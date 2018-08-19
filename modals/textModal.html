@@ -1,0 +1,34 @@
+<div class="modal-dialog" role="document">
+	<div class="modal-content">
+		<div class="modal-header bg-dark text-light">
+			<h5 class="modal-title" id="textModalTitle">Adicionar texto</h5>
+			<button type="button" class="btn btn-light fa fa-times" data-dismiss="modal" aria-label="Close" />
+		</div>
+		<div class="modal-body">
+			<form>
+				<div class="form-group">
+					<label for="text_content" class="col-form-label">Texto:</label>
+					<textarea class="form-control" id="text_content"></textarea>
+				</div>
+				<div class="form-group">
+					<label for="text_font" class="col-form-label">Fonte:</label>
+					<select id="text_font" class="form-control">
+						
+					</select>
+				</div>
+				<div class="form-group">
+					<label for="text_size" class="col-form-label">Tamanho da fonte:</label>
+					<input type="number" class="form-control" id="text_size" min="1" value="20" />
+				</div>
+				<div class="form-group">
+					<label for="text_color" class="col-form-label">Cor:</label>
+					<input type="color" class="form-control" id="text_color" value="#000000" />
+				</div>
+			</form>
+		</div>
+		<div class="modal-footer">
+			<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+			<button id="add_text" data-dismiss="modal" type="button" class="btn btn-primary">OK</button>
+		</div>
+	</div>
+</div>
