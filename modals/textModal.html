@@ -5,7 +5,7 @@
 			<button type="button" class="btn btn-light fa fa-times" data-dismiss="modal" aria-label="Close" />
 		</div>
 		<div class="modal-body">
-			<form>
+			<form id="text_form">
 				<div class="form-group">
 					<label for="text_content" class="col-form-label">Texto:</label>
 					<textarea class="form-control" id="text_content"></textarea>
@@ -16,13 +16,54 @@
 						
 					</select>
 				</div>
-				<div class="form-group">
-					<label for="text_size" class="col-form-label">Tamanho da fonte:</label>
-					<input type="number" class="form-control" id="text_size" min="1" value="20" />
+				<div class="form-row">
+					<div class="col-6 form-group">
+						<label for="text_size" class="col-form-label">Tamanho da fonte:</label>
+						<input type="number" class="form-control" id="text_size" min="1" value="45" />
+					</div>
+					<div class="col-6 form-group">
+						<label for="text_color" class="col-form-label">Cor:</label>
+						<input type="color" class="form-control" id="text_color" value="#000000" />
+					</div>
 				</div>
-				<div class="form-group">
-					<label for="text_color" class="col-form-label">Cor:</label>
-					<input type="color" class="form-control" id="text_color" value="#000000" />
+				<div class="form-row">
+					<div class="col-6 form-group">
+						<label for="text_draw" class="col-form-label">Contorno:</label>
+						<input type="number" class="form-control" id="text_draw" min="0" value="0" />
+					</div>
+					<div class="col-6 form-group">
+						<label for="text_draw_color" class="col-form-label">Cor:</label>
+						<input type="color" class="form-control" id="text_draw_color" value="#000000" />
+					</div>
+				</div>
+				<div class="form-row">
+					<div class="col-6 form-group">
+						<label for="text_bold" class="col-form-label">Negrito</label>
+						<br />
+
+						<div class="form-check form-check-inline">
+							<input type="checkbox" class="form-check-input" id="text_bold" />
+						</div>
+					</div>
+					<div class="col-6 form-group">
+						<label class="col-form-label">Alinhamento:</label>
+						<br />
+
+						<div class="form-check form-check-inline">
+							<input class="form-check-input" type="radio" name="text_align" id="text_align1" value="left" checked="checked" />
+							<label class="form-check-label" for="text_align1"><i class="fa fa-align-left"></i></label>
+						</div>
+
+						<div class="form-check form-check-inline">
+							<input class="form-check-input" type="radio" name="text_align" id="text_align2" value="center" />
+							<label class="form-check-label" for="text_align2"><i class="fa fa-align-center"></i></label>
+						</div>
+
+						<div class="form-check form-check-inline">
+							<input class="form-check-input" type="radio" name="text_align" id="text_align3" value="right" />
+							<label class="form-check-label" for="text_align3"><i class="fa fa-align-right"></i></label>
+						</div>
+					</div>
 				</div>
 			</form>
 		</div>

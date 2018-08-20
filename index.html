@@ -17,29 +17,15 @@
 	</head>
 	<body>
 		<div style="height: 100vh;" class="container-fluid">
-			<div style="min-height: 10%;" class="row justify-content-center bg-dark">
-				<div class="col col-auto my-1">
-					<span data-toggle="tooltip" data-placement="bottom" title="Redimensionar tela">
-						<button data-toggle="modal" data-target="#resizeModal" class="btn btn-success fa fa-5x fa-expand-arrows-alt" />
-					</span>
-				</div>
-				<div class="col col-auto my-1">
-					<span data-toggle="tooltip" data-placement="bottom" title="Adicionar template">
-						<button data-toggle="modal" data-target="#templateModal" class="btn btn-success fa fa-5x fa-image" />
-					</span>
-				</div>
-				<div class="col col-auto my-1">
-					<a data-toggle="tooltip" data-placement="bottom" title="Salvar" class="btn btn-success fa fa-5x fa-save" id="save" href="#" style="color: #fff;"></a>
-				</div>
-				<div class="col col-auto my-1">
-					<button data-toggle="tooltip" data-placement="bottom" title="Resetar" class="btn btn-success fa fa-5x fa-sync" id="reset" />
-				</div>
-			</div>
+			<div id="main_bar" style="min-height: 10%;" class="row justify-content-center bg-dark"></div>
 			<div style="min-height: 89%;" class="row bg-info">
 				<div id="canvas-container" class="col col-auto col-8 offset-2 bg-danger justify-content-center">
 					<canvas id="canvas"></canvas>
 				</div>
-				<div id="toolbar" class="col col-2 bg-dark"></div>
+				<div class="col col-2 bg-dark">
+					<div id="toolbar" class="row bg-light justify-content-center" style="height: 30%;"></div>
+					<div id="editor" class="row bg-light" style="height: 70%;"></div>
+				</div>
 			</div>
 		</div>
 
@@ -48,6 +34,12 @@
 		<div class="modal fade" id="templateModal" tabindex="-1" role="dialog" aria-labelledby="templateModalTitle" aria-hidden="true"></div>
 
 		<div class="modal fade" id="textModal" tabindex="-1" role="dialog" aria-labelledby="textModalTitle" aria-hidden="true"></div>
+
+		<div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalTitle" aria-hidden="true"></div>
+
+		<div class="modal fade" id="rectModal" tabindex="-1" role="dialog" aria-labelledby="rectModalTitle" aria-hidden="true"></div>
+
+		<div class="modal fade" id="circModal" tabindex="-1" role="dialog" aria-labelledby="circModalTitle" aria-hidden="true"></div>
 
 		<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
