@@ -131,4 +131,97 @@ $(document).ready(() => {
 
 		loadToolbar();
 	});
+
+	var isCtrlPressed = false;
+	var _clipboard = null;
+
+	$('#canvas-container').keydown((e) => {
+		if(e.key == 'Control')
+			isCtrlPressed = true;
+		else{
+			if(isCtrlPressed) {
+				if(e.key == 'c'){
+					copy();
+				}
+				else if(e.key == 'x') {
+					cut();
+				}
+				else if(e.key == 'v') {
+					paste();
+				}
+			}
+
+			if(e.key == 'Delete') {
+				$('#delete').click();
+			}
+		}
+	});
+
+	$('#canvas-container').keyup((e) => {
+		if(e.key == 'Control')
+			isCtrlPressed = false;
+	});
+
+	function copy() {
+		var clonedObject = canvas.getActiveObject();
+		
+		if(clonedObject) {
+			clonedObject.clone((cloned) => {
+				_clipboard = cloned;
+			});
+		}
+	}
+
+	function cut() {
+		var clonedObject = canvas.getActiveObject();
+		
+		if(clonedObject) {
+			clonedObject.clone((cloned) => {
+				_clipboard = cloned;
+			});
+
+			if(clonedObject.type == 'activeSelection') {
+				clonedObject.forEachObject((obj) => {
+					canvas.remove(obj);
+				});
+			}
+			else{
+				canvas.remove(clonedObject);
+			}
+
+			canvas.discardActiveObject();
+
+			canvas.renderAll();
+		}
+	}
+
+	function paste() {
+		if(_clipboard) {
+			_clipboard.clone((clonedObject) => {
+				canvas.discardActiveObject();
+
+				clonedObject.set({
+					left: (canvas.getWidth() / 2) - (clonedObject.width / 2),
+					top: (canvas.getHeight() / 2) - (clonedObject.height / 2),
+					evented: true
+				});
+
+				if(clonedObject.type == 'activeSelection') {
+					clonedObject.canvas = canvas;
+
+					clonedObject.forEachObject((obj) => {
+						canvas.add(obj);
+					});
+
+					clonedObject.setCoords();
+				}
+				else{
+					canvas.add(clonedObject);
+				}
+
+				canvas.setActiveObject(clonedObject);
+				canvas.renderAll();
+			});
+		}
+	}
 });
