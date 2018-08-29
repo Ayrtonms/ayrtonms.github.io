@@ -1,0 +1,24 @@
+<div class="modal-dialog" role="document">
+	<div class="modal-content">
+		<div class="modal-header bg-dark text-light">
+			<h5 class="modal-title" id="resizeModalTitle">Redimensionar tela</h5>
+			<button type="button" class="btn btn-light fa fa-times" data-dismiss="modal" aria-label="Close" />
+		</div>
+		<div class="modal-body">
+			<form>
+				<div class="form-group">
+					<label for="resize_width" class="col-form-label">Largura:</label>
+					<input type="number" class="form-control" id="resize_width" min="100" />
+				</div>
+				<div class="form-group">
+					<label for="resize_height" class="col-form-label">Altura:</label>
+					<input type="number" class="form-control" id="resize_height" min="100" />
+				</div>
+			</form>
+		</div>
+		<div class="modal-footer">
+			<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+			<button id="resize" data-dismiss="modal" type="button" class="btn btn-primary">OK</button>
+		</div>
+	</div>
+</div>
