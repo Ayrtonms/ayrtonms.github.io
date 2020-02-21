@@ -1,0 +1,313 @@
+<!doctype html>
+<html style="height: 100%;">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous" />
+        
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.4.1/css/all.min.css" />
+
+        <title>Gerador de gráficos</title>
+    </head>
+    <body style="height: 100%;" class="list-group-item-secondary">
+        <div id="app" class="row no-gutters justify-content-center p-3">
+            <div class="col-12 col-sm-10 col-md-8 p-3 bg-light rounded">
+                <p class="h3">Gerador de gráficos</p>
+            
+                <form id="form" @submit.prevent="generate" @reset.prevent="reset">
+                    <div class="row justify-content-center">
+                        <div class="form-group col-12 col-sm-6">
+                            <label for="title">Título do gráfico:</label>
+                            <input type="text" id="title" v-model="title" class="form-control" />
+                        </div>
+                        
+                        <div class="form-group col-12 col-sm-6">
+                            <label for="width">Largura do gráfico:</label>
+                            <input type="text" id="width" v-model="width" class="form-control" />
+                        </div>
+                        
+                        <div class="form-group col-12 col-sm-6">
+                            <label for="height">Altura do gráfico:</label>
+                            <input type="text" id="height" v-model="height" class="form-control" />
+                        </div>
+                        
+                        <div class="form-group col-12 col-sm-6">
+                            <label for="alpha">Cores transparentes:</label>
+                            <select id="alpha" v-model.number="alpha" class="form-control">
+                                <option value="1">Não</option>
+                                <option value="0.5">Sim</option>
+                            </select>
+                        </div>
+                    
+                        <div class="form-group col-12 col-sm-6">
+                            <label for="type">Tipo de gráfico:</label>
+                            <select id="type" v-model="type" class="form-control">
+                                <option value="">Selecione...</option>
+                                <option v-for="(name, value) in validTypes" :value="value">{{ name }}</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <template v-if="validTypes.hasOwnProperty(type)">
+                        <div class="mb-3">
+                            <template v-if="type === 'bar'">
+                                <p class="h5 text-center">Dados:</p>
+                                
+                                <div class="border rounded px-3 pt-3 mb-3">
+                                    <div class="row justify-content-center">
+                                        <div v-for="(label, index) in labels" class="form-group col-12 col-sm-6">
+                                            <label :for="'label-' + index">Dado {{ index + 1 }}:</label>
+                                            <div class="input-group">
+                                                <input
+                                                    type="text" :id="'label-' + index" v-model="labels[index]"
+                                                    class="form-control form-control-sm" />
+                                                    
+                                                <div class="input-group-append">
+                                                    <button
+                                                        type="button" class="btn btn-sm btn-danger input-group-text"
+                                                        @click="removeLabel(index)">
+                                                        
+                                                        <i class="fa fa-times"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <p class="text-center">
+                                        <button type="button" class="btn btn-sm btn-success" @click="addLabel">Adicionar dado</button>
+                                    </p>
+                                </div>
+                            </template>
+                        
+                            <p class="h5 text-center">Grupos:</p>
+                            
+                            <div class="row no-gutters justify-content-center border rounded">
+                                <div v-for="(group, index) in groups" class="col-12 col-sm-6 p-3">
+                                    <div class="row justify-content-center">
+                                        <div class="col-6 text-left">
+                                            <h6 class="font-weight-bold">Grupo {{ index + 1 }}:</h6>
+                                        </div>
+                                        
+                                        <div class="col-6 text-right">
+                                            <button type="button" class="btn fa fa-times" @click="removeGroup(index)"></button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label :for="'title-group-' + index">Título do grupo:</label>
+                                        <input
+                                            type="text" :id="'title-group-' + index" v-model="group.label"
+                                             class="form-control form-control-sm" />
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label :for="'title-color-' + index">Cor do grupo:</label>
+                                        <input
+                                            type="color" :id="'title-color-' + index" v-model="group.backgroundColor"
+                                            class="form-control form-control-sm" />
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label :for="'title-data-' + index">Dados:</label>
+                                        <div class="input-group">
+                                            <input
+                                                type="text" :id="'title-data-' + index" v-model="group.data"
+                                                class="form-control form-control-sm" />
+                                                
+                                            <div class="input-group-append">
+                                                <button type="button" class="btn btn-sm btn-info input-group-text" @click="showHint">
+                                                    <i class="fa fa-question"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                    
+                                <p class="col-12 text-center">
+                                    <button type="button" class="btn btn-sm btn-success" @click="addGroup">Adicionar grupo</button>
+                                </p>
+                            </div>
+                        </div>
+                    </template>
+                    
+                    <div class="row justify-content-center">
+                        <div class="col-auto">
+                            <button type="submit" class="btn btn-dark">Gerar</button>
+                        </div>
+                        
+                        <div class="col-auto">
+                            <button type="reset" class="btn btn-dark">Limpar</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+        
+        <script>
+            var app = new Vue({
+                el: '#app',
+                data: {
+                    validTypes: {
+                        'bar': 'Barras',
+                        'pie': 'Pizza'
+                    },
+                    title: '',
+                    width: '',
+                    height: '',
+                    alpha: 1,
+                    type: '',
+                    defaultGroup: {
+                        label: '',
+                        backgroundColor: '#000000',
+                        data: ''
+                    },
+                    labels: [],
+                    groups: [],
+                    chartWindow: null
+                },
+                watch: {
+                    type: function type () {
+                        this.labels = [''];
+                        this.groups = [JSON.parse(JSON.stringify(this.defaultGroup))];
+                    }
+                },
+                methods: {
+                    generate: function generate () {
+                        if (this.validTypes.hasOwnProperty(this.type)) {
+                            var _this = this;
+                            var valid = true;
+                            
+                            var labels = [];
+                            var datasets = [];
+                        
+                            if (this.type === 'bar') {
+                                labels = this.labels.slice();
+                            
+                                datasets = this.groups.map(function a (group) {
+                                    return {
+                                        label: group.label,
+                                        backgroundColor: Chart.helpers.color(group.backgroundColor).alpha(_this.alpha).rgbString(),
+                                        data: group.data.split(',')
+                                    };
+                                });
+                            } else {
+                                labels = this.groups.map(function b (group) {
+                                    return group.label;
+                                });
+                                
+                                datasets = [{
+                                    backgroundColor: [],
+                                    data: []
+                                }];
+                                
+                                this.groups.forEach(function c (group) {
+                                    datasets[0].backgroundColor.push(
+                                        Chart.helpers.color(group.backgroundColor).alpha(_this.alpha).rgbString()
+                                    );
+                                    
+                                    datasets[0].data.push(group.data.split(',')[0]);
+                                });
+                            }
+                            
+                            var width = (isNaN(this.width) || !this.width) ? 400 : this.width;
+                            var height = (isNaN(this.height) || !this.height) ? 400 : this.height;
+                        
+                            var jsTemplate = `
+                                var ctx = document.getElementById('canvas').getContext('2d');
+
+                                var chart = new Chart(ctx, {
+                                    type: '${this.type}',
+                                    data: {
+                                        labels: ${JSON.stringify(labels)},
+                                        datasets: ${JSON.stringify(datasets)}
+                                    },
+                                    options: {
+                                        title: {
+                                            display: true,
+                                            text: '${this.title}'
+                                        },
+                                        maintainAspectRatio: false,
+                                        scales: {
+                                            yAxes: [{
+                                                ticks: {
+                                                    beginAtZero: true
+                                                }
+                                            }]
+                                        }
+                                    }
+                                });
+                            `;
+                            
+                            $.get("header.html")
+                            .done(function e (res1) {
+                                var header = res1;
+                                
+                                $.get("footer.html")
+                                .done(function f (res2) {
+                                    var footer = res2;
+                                    var conf = 'width=' + width + ',height=' + height;
+                                    
+                                    if (_this.chartWindow) {
+                                        _this.chartWindow.close();
+                                    }
+                                    
+                                    _this.chartWindow = window.open('', 'Gráfico', conf);
+                                    
+                                    _this.chartWindow.document.write((header + jsTemplate + footer));
+                                })
+                                .fail(function g (res2) {
+                                    alert('Erro ao carregar o gráfico!');
+                                });
+                            })
+                            .fail(function h (res1) {
+                                alert('Erro ao carregar o gráfico!');
+                            });
+                        } else {
+                            alert('Você precisa selecionar o tipo do gráfico.');
+                        }
+                    },
+                    reset: function reset () {
+                        this.title = '';
+                        this.width = '';
+                        this.height = '';
+                        this.alpha = 1;
+                        this.type = '';
+                        
+                        this.labels = [''];
+                        this.groups = [JSON.parse(JSON.stringify(this.defaultGroup))];
+                    },
+                    showHint: function showHint () {
+                        alert('Os dados devem ser numéricos, separados apenas por vírgula.');
+                    },
+                    addLabel: function addLabel () {
+                        this.labels.push('');
+                    },
+                    removeLabel: function removeLabel (index) {
+                        if (this.labels.length > 1) {
+                            this.labels.splice(index, 1);
+                        } else {
+                            this.labels = [''];
+                        }
+                    },
+                    addGroup: function addGroup (index) {
+                        this.groups.push(JSON.parse(JSON.stringify(this.defaultGroup)));
+                    },
+                    removeGroup: function removeGroup (index) {
+                        if (this.groups.length > 1) {
+                            this.groups.splice(index, 1);
+                        } else {
+                            this.groups = [JSON.parse(JSON.stringify(this.defaultGroup))];
+                        }
+                    }
+                }
+            });
+        </script>
+    </body>
+</html>
