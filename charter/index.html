@@ -110,15 +110,15 @@
                                     </div>
                                     
                                     <div class="form-group">
-                                        <label :for="'title-data-' + index">Dados:</label>
+                                        <label :for="'title-data-' + index">{{ type === 'bar' ? 'Dados:' : 'Dado:' }}</label>
                                         <div class="input-group">
                                             <input
                                                 type="text" :id="'title-data-' + index" v-model="group.data"
                                                 class="form-control form-control-sm" />
                                                 
-                                            <div class="input-group-append">
+                                            <div class="input-group-append" v-if="type === bar">
                                                 <button type="button" class="btn btn-sm btn-info input-group-text" @click="showHint">
-                                                    <i class="fa fa-question"></i>
+                                                    <i class="fa fa-question-circle"></i>
                                                 </button>
                                             </div>
                                         </div>
