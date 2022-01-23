@@ -170,7 +170,16 @@
 
                             if (Array.isArray(tmp)) {
                                 this.dados = tmp;
-                                this.editado = false;
+
+                                this.counter = this.dados.reduce(function f (acc, dado) {
+                                    if (dado.rowkey > acc) return dado.rowkey;
+                                }, 0) + 1;
+
+                                var _this = this;
+                                
+                                Vue.nextTick(function f () {
+                                    _this.editado = false;
+                                });
                             } else if (alertar) {
                                 alert('Nenhum dado estava salvo.');
                             }
