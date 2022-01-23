@@ -1,0 +1,349 @@
+<!doctype html>
+<html style="height: 100%;">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous" />
+        
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.4.1/css/all.min.css" />
+
+        <title>Feira</title>
+    </head>
+    <body style="height: 100%;" class="list-group-item-secondary">
+        <div id="app" class="row no-gutters justify-content-center p-3">
+            <div class="col-12 p-3 bg-light rounded">
+                <p class="h3">Feira{{ editado ? ' (não salvo)' : '' }}</p>
+
+                <div class="row">
+                    <div class="col-auto mb-3">
+                        <button id="salvar" type="button" class="btn btn-sm btn-secondary" @click="save">Salvar</button>
+                    </div>
+
+                    <div class="col-auto mb-3">
+                        <button
+                            id="recarregar" type="button" class="btn btn-sm btn-secondary" @click="reload(true)">
+                                Recarregar
+                        </button>
+                    </div>
+                </div>
+
+                <p class="h4">Total (Mercantil): {{ calcularTotalMercantil() }}</p>
+                <p class="h4">Total (Cacarejo): {{ calcularTotalCacarejo() }}</p>
+                <p class="h4">Total (Final): {{ calcularTotalFinal() }}</p>
+
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered">
+                        <thead>
+                            <tr class="bg-secondary">
+                                <td colspan="10">
+                                    <button type="button" class="btn btn-sm btn-light" @click="add">Novo</button>
+                                </td>
+                            </tr>
+
+                            <tr class="bg-secondary text-light">
+                                <th>Linha</th>
+                                <th class="text-center"></th>
+                                <th>Produto</th>
+                                <th>Quantidade</th>
+                                <th>Preço (M)</th>
+                                <th>Total (M)</th>
+                                <th>Preço (C)</th>
+                                <th>Total (C)</th>
+                                <th>Observações</th>
+                                <th>Total geral</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr v-if="!dados.length">
+                                <td colspan="10">Nenhum registro encontrado.</td>
+                            </tr>
+
+                            <template v-else>
+                                <tr v-for="(dado, index) in dados" :key="'linha-' + dados[index].rowkey">
+                                    <td class="text-center">{{ (index + 1) }}</td>
+
+                                    <td class="text-center">
+                                        <button
+                                            type="button" class="btn btn-sm fa fa-times" title="Cancelar" @click="cancel (index)">
+                                        </button>
+                                    </td>
+
+                                    <td style="white-space: pre-line; min-width: 100px;">
+                                        <input
+                                            type="text" class="form-control form-control-sm"
+                                            v-model="dados[index].produto" />
+                                    </td>
+
+                                    <td style="white-space: pre-line; min-width: 100px;">
+                                        <input
+                                            type="text" class="form-control form-control-sm" :value="dados[index].quantidade"
+                                            @change="formatRealField(index, 0, $event)" @focus="selecionarTudo" />
+                                    </td>
+
+                                    <td style="white-space: pre-line; min-width: 100px;">
+                                        <input
+                                            type="text" class="form-control form-control-sm" :value="dados[index].preco_m"
+                                            @change="formatRealField(index, 1, $event)" @focus="selecionarTudo" />
+                                    </td>
+
+                                    <td style="white-space: pre-line;">
+                                        <span>{{ calcularTotal(dados[index].quantidade, dados[index].preco_m) }}</span>
+                                    </td>
+
+                                    <td style="white-space: pre-line; min-width: 100px;">
+                                        <input
+                                            type="text" class="form-control form-control-sm" :value="dados[index].preco_c"
+                                            @change="formatRealField(index, 2, $event)" @focus="selecionarTudo" />
+                                    </td>
+
+                                    <td style="white-space: pre-line;">
+                                        <span>{{ calcularTotal(dados[index].quantidade, dados[index].preco_c) }}</span>
+                                    </td>
+
+                                    <td style="white-space: pre-line; min-width: 100px;">
+                                        <textarea
+                                            class="form-control form-control-sm" v-model="dados[index].observacoes" rows="2">
+                                        </textarea>
+                                    </td>
+
+                                    <td style="white-space: pre-line;">
+                                        <span>{{ calcularTotalGeral(dados[index]) }}</span>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+
+                        <tfoot>
+                            <tr class="bg-secondary text-light">
+                                <td colspan="10">
+                                    <button type="button" class="btn btn-sm btn-light" @click="add">Novo</button>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10"></script>
+        
+        <script>
+            var app = new Vue({
+                el: '#app',
+                data: {
+                    editado: false,
+                    counter: 0,
+                    dados: []
+                },
+                watch: {
+                    dados: function dados () {
+                        this.editado = true;
+                    }
+                },
+                methods: {
+                    save: function save () {
+                        var storage = window.localStorage;
+
+                        if (!storage) {
+                            alert('Seu navegador não permite que salve dados!');
+                        } else {
+                            storage.setItem('dados_feira', JSON.stringify(this.dados));
+
+                            alert('Dados salvos com sucesso!');
+
+                            this.editado = false;
+                        }
+                    },
+                    reload: function reload (alertar) {
+                        var storage = window.localStorage;
+
+                        if (!storage) {
+                            if (alertar) {
+                                alert('Seu navegador não permite que salve dados!');
+                            }
+                        } else {
+                            var tmp = JSON.parse(storage.getItem('dados_feira'));
+
+                            if (Array.isArray(tmp)) {
+                                this.dados = tmp;
+                            } else if (alertar) {
+                                alert('Nenhum dado estava salvo.');
+                            }
+
+                            this.editado = false;
+                        }
+                    },
+                    add: function add () {
+                        let novo = {};
+
+                        novo.rowkey = this.counter;
+                        novo.produto = '';
+                        novo.quantidade = '0,00';
+                        novo.preco_m = '0,00';
+                        novo.preco_c = '0,00';
+                        novo.observacoes = '';
+
+                        this.counter++;
+
+                        this.dados.push(novo);
+                    },
+                    cancel: function cancel (index) {
+                        this.dados.splice(index, 1);
+                    },
+                    formatRealField: function formatRealField (index, field, event) {
+                        var val = '';
+        
+                        val = this.formatReal(event.target.value);
+
+                        if (field == 0) {
+                            this.dados[index].quantidade = val;
+                        } else if (field == 1) {
+                            this.dados[index].preco_m = val;
+                        } else if (field == 2) {
+                            this.dados[index].preco_c = val;
+                        }
+                        
+                        event.target.value = val;
+                    },
+                    formatReal: function formatReal (number) {
+                        var val = parseFloat(new String(number).replace('.', '').replace(',', '.'));
+            
+                        if (isNaN(val)) {
+                            val = '0';
+                        }
+                        
+                        var numberFormatter = new Intl.NumberFormat(
+                            'pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }
+                        );
+                        
+                        return numberFormatter.format(val);
+                    },
+                    selecionarTudo: function selecionarTudo (event) {
+                        event.target.setSelectionRange(0, event.target.value.length);
+                    },
+                    calcularTotal: function calcularTotal (v1, v2) {
+                        var t1 = parseFloat(new String(v1).replace('.', '').replace(',', '.'));
+                        var t2 = parseFloat(new String(v2).replace('.', '').replace(',', '.'));
+
+                        var total = t1 * t2;
+
+                        return this.doubleToReal(total);
+                    },
+                    calcularTotalGeral: function calcularTotalGeral (dado) {
+                        var q = parseFloat(new String(dado.quantidade).replace('.', '').replace(',', '.'));
+                        var p1 = parseFloat(new String(dado.preco_m).replace('.', '').replace(',', '.'));
+                        var p2 = parseFloat(new String(dado.preco_c).replace('.', '').replace(',', '.'));
+
+                        var pf = 0;
+
+                        if (p1 == 0) {
+                            pf = p2
+                        } else if (p2 == 0) {
+                            pf = p1;
+                        } else {
+                            if (p1 > p2) {
+                                pf = p2;
+                            } else {
+                                pf = p1;
+                            }
+                        }
+
+                        var total = q * pf;
+
+                        return this.doubleToReal(total);
+                    },
+                    doubleToReal: function doubleToReal (number) {
+                        if (isNaN(number) || number === null) {
+                            return '';
+                        }
+                        
+                        var numberFormatter = new Intl.NumberFormat(
+                            'pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }
+                        );
+                    
+                        return numberFormatter.format(new String(number));
+                    },
+                    calcularTotalMercantil: function calcularTotalMercantil () {
+                        var total = this.dados.reduce(function f (acc, dado) {
+                            var q = parseFloat(new String(dado.quantidade).replace('.', '').replace(',', '.'));
+                            var v1 = parseFloat(new String(dado.preco_m).replace('.', '').replace(',', '.'));
+                            var v2 = parseFloat(new String(dado.preco_c).replace('.', '').replace(',', '.'));
+                            var vf = 0;
+
+                            if (v1 == 0) {
+                                vf = 0;
+                            } else if (v2 == 0) {
+                                vf = v1;
+                            } else {
+                                if (v1 > v2) {
+                                    vf = 0;
+                                } else {
+                                    vf = v1;
+                                }
+                            }
+
+                            return acc + (q * vf);
+                        }, 0);
+
+                        return this.doubleToReal(total);
+                    },
+                    calcularTotalCacarejo: function calcularTotalCacarejo () {
+                        var total = this.dados.reduce(function f (acc, dado) {
+                            var q = parseFloat(new String(dado.quantidade).replace('.', '').replace(',', '.'));
+                            var v1 = parseFloat(new String(dado.preco_m).replace('.', '').replace(',', '.'));
+                            var v2 = parseFloat(new String(dado.preco_c).replace('.', '').replace(',', '.'));
+                            var vf = 0;
+
+                            if (v2 == 0) {
+                                vf = 0;
+                            } else if (v1 == 0) {
+                                vf = v2;
+                            } else {
+                                if (v2 > v1) {
+                                    vf = 0;
+                                } else {
+                                    vf = v2;
+                                }
+                            }
+
+                            return acc + (q * vf);
+                        }, 0);
+
+                        return this.doubleToReal(total);
+                    },
+                    calcularTotalFinal: function calcularTotalFinal () {
+                        var total = this.dados.reduce(function f (acc, dado) {
+                            var q = parseFloat(new String(dado.quantidade).replace('.', '').replace(',', '.'));
+                            var v1 = parseFloat(new String(dado.preco_m).replace('.', '').replace(',', '.'));
+                            var v2 = parseFloat(new String(dado.preco_c).replace('.', '').replace(',', '.'));
+                            var vf = 0;
+
+                            if (v1 == 0) {
+                                vf = v2;
+                            } else if (v2 == 0) {
+                                vf = v1;
+                            } else {
+                                if (v1 > v2) {
+                                    vf = v2;
+                                } else {
+                                    vf = v1;
+                                }
+                            }
+
+                            return acc + (q * vf);
+                        }, 0);
+
+                        return this.doubleToReal(total);
+                    }
+                },
+                mounted: function mounted () {
+                    this.reload(false);
+                }
+            });
+        </script>
+    </body>
+</html>
