@@ -172,7 +172,11 @@
                                 this.dados = tmp;
 
                                 this.counter = this.dados.reduce(function f (acc, dado) {
-                                    if (dado.rowkey > acc) return dado.rowkey;
+                                    if (dado.rowkey > acc) {
+                                        return dado.rowkey;
+                                    } else {
+                                        return acc;
+                                    }
                                 }, 0) + 1;
 
                                 var _this = this;
