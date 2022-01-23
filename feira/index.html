@@ -170,11 +170,10 @@
 
                             if (Array.isArray(tmp)) {
                                 this.dados = tmp;
+                                this.editado = false;
                             } else if (alertar) {
                                 alert('Nenhum dado estava salvo.');
                             }
-
-                            this.editado = false;
                         }
                     },
                     add: function add () {
