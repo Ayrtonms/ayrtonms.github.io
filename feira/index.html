@@ -42,14 +42,11 @@
                             </tr>
 
                             <tr class="bg-secondary text-light">
-                                <th>Linha</th>
                                 <th class="text-center"></th>
                                 <th>Produto</th>
                                 <th>Quantidade</th>
-                                <th>Preço (M)</th>
-                                <th>Total (M)</th>
-                                <th>Preço (C)</th>
-                                <th>Total (C)</th>
+                                <th>Preços</th>
+                                <th>Totais</th>
                                 <th>Observações</th>
                                 <th>Total geral</th>
                             </tr>
@@ -62,47 +59,77 @@
 
                             <template v-else>
                                 <tr v-for="(dado, index) in dados" :key="'linha-' + dados[index].rowkey">
-                                    <td class="text-center">{{ (index + 1) }}</td>
-
                                     <td class="text-center">
                                         <button
                                             type="button" class="btn btn-sm fa fa-times" title="Cancelar" @click="cancel (index)">
                                         </button>
                                     </td>
 
-                                    <td style="white-space: pre-line; min-width: 100px;">
+                                    <td style="white-space: pre-line; min-width: 50px;">
                                         <input
                                             type="text" class="form-control form-control-sm"
                                             v-model="dados[index].produto" />
                                     </td>
 
-                                    <td style="white-space: pre-line; min-width: 100px;">
+                                    <td style="white-space: pre-line; min-width: 50px;">
                                         <input
                                             type="text" class="form-control form-control-sm" :value="dados[index].quantidade"
                                             @change="formatRealField(index, 0, $event)" @focus="selecionarTudo" />
                                     </td>
 
-                                    <td style="white-space: pre-line; min-width: 100px;">
-                                        <input
-                                            type="text" class="form-control form-control-sm" :value="dados[index].preco_m"
-                                            @change="formatRealField(index, 1, $event)" @focus="selecionarTudo" />
+                                    <td style="white-space: pre-line; min-width: 50px;">
+                                        <div class="row no-gutters">
+                                            <div class="col-12 input-group input-group-sm">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text text-monospace">M</span>
+                                                </div>
+
+                                                <input
+                                                    type="text" class="form-control form-control-sm"
+                                                    :value="dados[index].preco_m" @change="formatRealField(index, 1, $event)"
+                                                    @focus="selecionarTudo" />
+                                            </div>
+
+                                            <div class="col-12 input-group input-group-sm mt-2">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text text-monospace">C</span>
+                                                </div>
+
+                                                <input
+                                                    type="text" class="form-control form-control-sm"
+                                                    :value="dados[index].preco_c" @change="formatRealField(index, 2, $event)"
+                                                    @focus="selecionarTudo" />
+                                            </div>
+                                        </div>
                                     </td>
 
                                     <td style="white-space: pre-line;">
-                                        <span>{{ calcularTotal(dados[index].quantidade, dados[index].preco_m) }}</span>
+                                        <div class="row no-gutters">
+                                            <div class="col-12 input-group input-group-sm">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text text-monospace">M</span>
+                                                </div>
+
+                                                <input
+                                                    type="text" class="form-control form-control-sm"
+                                                    :value="calcularTotal(dados[index].quantidade, dados[index].preco_m)"
+                                                    disabled />
+                                            </div>
+
+                                            <div class="col-12 input-group input-group-sm mt-2">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text text-monospace">C</span>
+                                                </div>
+
+                                                <input
+                                                    type="text" class="form-control form-control-sm"
+                                                    :value="calcularTotal(dados[index].quantidade, dados[index].preco_c)" 
+                                                    disabled />
+                                            </div>
+                                        </div>
                                     </td>
 
-                                    <td style="white-space: pre-line; min-width: 100px;">
-                                        <input
-                                            type="text" class="form-control form-control-sm" :value="dados[index].preco_c"
-                                            @change="formatRealField(index, 2, $event)" @focus="selecionarTudo" />
-                                    </td>
-
-                                    <td style="white-space: pre-line;">
-                                        <span>{{ calcularTotal(dados[index].quantidade, dados[index].preco_c) }}</span>
-                                    </td>
-
-                                    <td style="white-space: pre-line; min-width: 100px;">
+                                    <td style="white-space: pre-line; min-width: 50px;">
                                         <textarea
                                             class="form-control form-control-sm" v-model="dados[index].observacoes" rows="2">
                                         </textarea>
