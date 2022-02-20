@@ -26,9 +26,25 @@
                                 Recarregar
                         </button>
                     </div>
+
+                    <div class="col-auto mb-3">
+                        <button
+                            id="importar" type="button" class="btn btn-sm btn-secondary" @click="importar">
+                                Importar
+                        </button>
+                    </div>
+
+                    <div class="col-auto mb-3">
+                        <button
+                            id="exportar" type="button" class="btn btn-sm btn-secondary" @click="exportar">
+                                Exportar
+                        </button>
+                    </div>
                 </div>
 
-                <p class="h4">Total (Mercantil): {{ calcularTotalMercantil() }}</p>
+                <textarea class="form-control form-control-sm" @change="importText = $event.target.value">{{ importText }}</textarea>
+
+                <p class="h4 mt-2">Total (Mercantil): {{ calcularTotalMercantil() }}</p>
                 <p class="h4">Total (Cacarejo): {{ calcularTotalCacarejo() }}</p>
                 <p class="h4">Total (Final): {{ calcularTotalFinal() }}</p>
 
@@ -164,6 +180,7 @@
                 data: {
                     editado: false,
                     counter: 0,
+                    importText: '',
                     dados: []
                 },
                 watch: {
@@ -213,6 +230,57 @@
                                 });
                             } else if (alertar) {
                                 alert('Nenhum dado estava salvo.');
+                            }
+                        }
+                    },
+                    importar: function importar () {
+                        var tmp = JSON.parse(atob(this.importText));
+
+                        if (Array.isArray(tmp)) {
+                            this.dados = tmp;
+
+                            this.counter = this.dados.reduce(function f (acc, dado) {
+                                if (dado.rowkey > acc) {
+                                    return dado.rowkey;
+                                } else {
+                                    return acc;
+                                }
+                            }, 0) + 1;
+
+                            var _this = this;
+                            
+                            Vue.nextTick(function f () {
+                                _this.editado = false;
+                            });
+                        }
+                    },
+                    exportar: function exportar () {
+                        var tmp = btoa(JSON.stringify(this.dados));
+
+                        if (!tmp || 0 === tmp.length) {
+                            alert('Nada a copiar.');
+                        } else {
+                            try {
+                                var elem = document.createElement('textarea');
+
+                                elem.value = tmp;
+
+                                elem.style.top = '0';
+                                elem.style.left = '0';
+                                elem.style.position = 'fixed';
+
+                                document.body.appendChild(elem);
+
+                                elem.focus();
+                                elem.select();
+
+                                document.execCommand('copy');
+
+                                document.body.removeChild(elem);
+
+                                alert('Copiado com sucesso.');
+                            } catch (err) {
+                                console.error(err);
                             }
                         }
                     },
