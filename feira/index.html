@@ -45,7 +45,7 @@
                     <div class="col-auto mb-3">
                         <button
                             id="ocultar" type="button" class="btn btn-sm btn-secondary" @click="ocultando = !ocultando">
-                                Ocultar comprados / desnecessários
+                                {{ ocultando ? 'Exibir' : 'Ocultar' }} comprados / desnecessários
                         </button>
                     </div>
 
@@ -60,6 +60,13 @@
                         <button
                             id="zerar" type="button" class="btn btn-sm btn-secondary" @click="zerar">
                                 Zerar preços
+                        </button>
+                    </div>
+
+                    <div class="col-auto mb-3 d-none d-lg-block">
+                        <button
+                            id="descomprar" type="button" class="btn btn-sm btn-secondary" @click="descomprar">
+                                Desmarcar comprados
                         </button>
                     </div>
                 </div>
@@ -86,7 +93,7 @@
                                 </button>
 
                                 <button
-                                    class="btn btn-sm btn-light font-weight-bold" data-toggle="collapse" :data-target="'#fold-' + index" type="button">
+                                    class="btn btn-sm btn-light font-weight-bold mr-2" data-toggle="collapse" :data-target="'#fold-' + index" type="button">
                                     {{ dados[index].produto }} - {{ dados[index].quantidade }} ({{ calcularTotalGeral(dados[index]) }})
                                 </button>
 
@@ -333,6 +340,13 @@
                             item.preco_1 = '0,00';
                             item.preco_2 = '0,00';
                             item.preco_3 = '0,00';
+
+                            return item;
+                        });
+                    },
+                    descomprar: function descomprar () {
+                        this.dados = this.dados.map(function (item) {
+                            item.comprado = false;
 
                             return item;
                         });
