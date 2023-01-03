@@ -10,6 +10,7 @@
 
         <title>Feira</title>
     </head>
+
     <body style="height: 100%;" class="list-group-item-secondary">
         <div id="app" class="row no-gutters justify-content-center p-3">
             <div class="col-12 p-3 bg-light rounded">
@@ -40,133 +41,157 @@
                                 Exportar
                         </button>
                     </div>
+
+                    <div class="col-auto mb-3">
+                        <button
+                            id="ocultar" type="button" class="btn btn-sm btn-secondary" @click="ocultando = !ocultando">
+                                Ocultar comprados / desnecessários
+                        </button>
+                    </div>
+
+                    <div class="col-auto mb-3">
+                        <button
+                            id="organizar" type="button" class="btn btn-sm btn-secondary" @click="organizar">
+                                Organizar
+                        </button>
+                    </div>
+
+                    <div class="col-auto mb-3 d-none d-lg-block">
+                        <button
+                            id="zerar" type="button" class="btn btn-sm btn-secondary" @click="zerar">
+                                Zerar preços
+                        </button>
+                    </div>
                 </div>
 
                 <textarea class="form-control form-control-sm" @change="importText = $event.target.value">{{ importText }}</textarea>
 
-                <p class="h4 mt-2">Total (Mercantil): {{ calcularTotalMercantil() }}</p>
-                <p class="h4">Total (Cacarejo): {{ calcularTotalCacarejo() }}</p>
+                <p class="h4 mt-2">Total (1): {{ calcularTotalLocal(1) }}</p>
+                <p class="h4">Total (2): {{ calcularTotalLocal(2) }}</p>
+                <p class="h4">Total (3): {{ calcularTotalLocal(3) }}</p>
                 <p class="h4">Total (Final): {{ calcularTotalFinal() }}</p>
 
-                <div class="table-responsive">
-                    <table class="table table-sm table-bordered">
-                        <thead>
-                            <tr class="bg-secondary">
-                                <td colspan="10">
-                                    <button type="button" class="btn btn-sm btn-light" @click="add">Novo</button>
-                                </td>
-                            </tr>
+                <button type="button" class="btn btn-sm btn-secondary mt-1" @click="add">Novo</button>
 
-                            <tr class="bg-secondary text-light">
-                                <th class="text-center"></th>
-                                <th>Produto</th>
-                                <th>Quantidade</th>
-                                <th>Preços</th>
-                                <th>Totais</th>
-                                <th>Observações</th>
-                                <th>Total geral</th>
-                            </tr>
-                        </thead>
+                <div class="accordion my-3" id="lista">
+                    <div v-for="(dado, index) in dados" class="card" :key="'card-' + index">
+                        <div
+                            class="card-header" :class="dados[index].comprado ? 'bg-success' : 'bg-danger'"
+                            v-show="!ocultando || (!dados[index].comprado && dados[index].quantidade != '0,00')">
 
-                        <tbody>
-                            <tr v-if="!dados.length">
-                                <td colspan="10">Nenhum registro encontrado.</td>
-                            </tr>
+                            <h5 class="mb-0 d-flex">
+                                <button
+                                    class="btn btn-sm btn-light mr-2" :class="dados[index].comprado ? 'fa fa-check' : 'fa'"
+                                    type="button" style="line-height: 1.5;" @click="alternar(index)">{{ dados[index].comprado ? '' : '&nbsp;&nbsp;&nbsp;&nbsp;' }}
+                                </button>
 
-                            <template v-else>
-                                <tr v-for="(dado, index) in dados" :key="'linha-' + dados[index].rowkey">
-                                    <td class="text-center">
-                                        <button
-                                            type="button" class="btn btn-sm fa fa-times" title="Cancelar" @click="cancel (index)">
-                                        </button>
-                                    </td>
+                                <button
+                                    class="btn btn-sm btn-light font-weight-bold" data-toggle="collapse" :data-target="'#fold-' + index" type="button">
+                                    {{ dados[index].produto }} - {{ dados[index].quantidade }} ({{ calcularTotalGeral(dados[index]) }})
+                                </button>
 
-                                    <td style="white-space: pre-line; min-width: 50px;">
-                                        <input
-                                            type="text" class="form-control form-control-sm"
-                                            v-model="dados[index].produto" />
-                                    </td>
+                                <button
+                                    class="ml-auto btn btn-sm btn-light fa fa-times" type="button" style="line-height: 1.5;"
+                                    @click="cancel(index)">
+                                </button>
+                            </h5>
+                        </div>
 
-                                    <td style="white-space: pre-line; min-width: 50px;">
-                                        <input
-                                            type="text" class="form-control form-control-sm" :value="dados[index].quantidade"
-                                            @change="formatRealField(index, 0, $event)" @focus="selecionarTudo" />
-                                    </td>
+                        <div :id="'fold-' + index" class="collapse" data-parent="#lista">
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label :for="'produto-' + index" class="font-weight-bold">Produto:</label>
 
-                                    <td style="white-space: pre-line; min-width: 100px;">
-                                        <div class="row no-gutters">
-                                            <div class="col-12 input-group input-group-sm">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text text-monospace">M</span>
-                                                </div>
+                                    <input
+                                        type="text" class="form-control form-control-sm"
+                                        v-model="dados[index].produto" :id="'produto-' + index" />
+                                </div>
 
-                                                <input
-                                                    type="text" class="form-control form-control-sm"
-                                                    :value="dados[index].preco_m" @change="formatRealField(index, 1, $event)"
-                                                    @focus="selecionarTudo" />
-                                            </div>
+                                <div class="form-group">
+                                    <label :for="'quantidade-' + index" class="font-weight-bold">Quantidade:</label>
 
-                                            <div class="col-12 input-group input-group-sm mt-2">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text text-monospace">C</span>
-                                                </div>
+                                    <input
+                                        type="text" class="form-control form-control-sm" :value="dados[index].quantidade"
+                                        @change="formatRealField(index, 0, $event)" @focus="selecionarTudo"
+                                        :id="'quantidade-' + index" />
+                                </div>
 
-                                                <input
-                                                    type="text" class="form-control form-control-sm"
-                                                    :value="dados[index].preco_c" @change="formatRealField(index, 2, $event)"
-                                                    @focus="selecionarTudo" />
-                                            </div>
-                                        </div>
-                                    </td>
+                                <div class="form-group">
+                                    <label :for="'preco_1-' + index" class="font-weight-bold">Preço (1):</label>
 
-                                    <td style="white-space: pre-line; min-width: 100px;">
-                                        <div class="row no-gutters">
-                                            <div class="col-12 input-group input-group-sm">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text text-monospace">M</span>
-                                                </div>
+                                    <input
+                                        type="text" class="form-control form-control-sm" :id="'preco_1-' + index"
+                                        :value="dados[index].preco_1" @change="formatRealField(index, 1, $event)"
+                                        @focus="selecionarTudo" />
+                                </div>
 
-                                                <input
-                                                    type="text" class="form-control form-control-sm"
-                                                    :value="calcularTotal(dados[index].quantidade, dados[index].preco_m)"
-                                                    disabled />
-                                            </div>
+                                <div class="form-group">
+                                    <label class="font-weight-bold">Total (1):</label>
 
-                                            <div class="col-12 input-group input-group-sm mt-2">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text text-monospace">C</span>
-                                                </div>
+                                    <input
+                                        type="text" class="form-control form-control-sm"
+                                        :value="calcularTotal(dados[index].quantidade, dados[index].preco_1)"
+                                        disabled />
+                                </div>
 
-                                                <input
-                                                    type="text" class="form-control form-control-sm"
-                                                    :value="calcularTotal(dados[index].quantidade, dados[index].preco_c)" 
-                                                    disabled />
-                                            </div>
-                                        </div>
-                                    </td>
+                                <div class="form-group">
+                                    <label :for="'preco_2-' + index" class="font-weight-bold">Preço (2):</label>
 
-                                    <td style="white-space: pre-line; min-width: 50px;">
-                                        <textarea
-                                            class="form-control form-control-sm" v-model="dados[index].observacoes" rows="2">
-                                        </textarea>
-                                    </td>
+                                    <input
+                                        type="text" class="form-control form-control-sm" :id="'preco_2-' + index"
+                                        :value="dados[index].preco_2" @change="formatRealField(index, 2, $event)"
+                                        @focus="selecionarTudo" />
+                                </div>
 
-                                    <td style="white-space: pre-line;">
-                                        <span>{{ calcularTotalGeral(dados[index]) }}</span>
-                                    </td>
-                                </tr>
-                            </template>
-                        </tbody>
+                                <div class="form-group">
+                                    <label class="font-weight-bold">Total (2):</label>
 
-                        <tfoot>
-                            <tr class="bg-secondary text-light">
-                                <td colspan="10">
-                                    <button type="button" class="btn btn-sm btn-light" @click="add">Novo</button>
-                                </td>
-                            </tr>
-                        </tfoot>
-                    </table>
+                                    <input
+                                        type="text" class="form-control form-control-sm"
+                                        :value="calcularTotal(dados[index].quantidade, dados[index].preco_2)" 
+                                        disabled />
+                                </div>
+
+                                <div class="form-group">
+                                    <label :for="'preco_3-' + index" class="font-weight-bold">Preço (3):</label>
+
+                                    <input
+                                        type="text" class="form-control form-control-sm" :id="'preco_3-' + index"
+                                        :value="dados[index].preco_3" @change="formatRealField(index, 3, $event)"
+                                        @focus="selecionarTudo" />
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="font-weight-bold">Total (3):</label>
+
+                                    <input
+                                        type="text" class="form-control form-control-sm"
+                                        :value="calcularTotal(dados[index].quantidade, dados[index].preco_3)"
+                                        disabled />
+                                </div>
+
+                                <div class="form-group">
+                                    <label :for="'categoria-' + index" class="font-weight-bold">Categoria:</label>
+
+                                    <input
+                                        type="text" class="form-control form-control-sm" :id="'categoria-' + index"
+                                        v-model="dados[index].categoria" />
+                                </div>
+
+                                <div class="form-group">
+                                    <label :for="'observacoes-' + index" class="font-weight-bold">Obs:</label>
+
+                                    <textarea
+                                        class="form-control form-control-sm" :id="'observacoes-' + index"
+                                        v-model="dados[index].observacoes" rows="2">
+                                    </textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
+                <button type="button" class="btn btn-sm btn-secondary" @click="add">Novo</button>
             </div>
         </div>
         
@@ -181,6 +206,7 @@
                     editado: false,
                     counter: 0,
                     importText: '',
+                    ocultando: false,
                     dados: []
                 },
                 watch: {
@@ -284,15 +310,44 @@
                             }
                         }
                     },
+                    organizar: function organizar () {
+                        var tmp = JSON.parse(JSON.stringify(this.dados));
+
+                        tmp.sort(function f (a, b) {
+                            var x = a.quantidade == '0,00' ? 0 : 1;
+                            var y = b.quantidade == '0,00' ? 0 : 1;
+
+                            if (x != y) return y - x;
+
+                            if (a.categoria > b.categoria) return 1;
+
+                            if (b.categoria > a.categoria) return -1;
+
+                            return 0;
+                        });
+
+                        this.dados = tmp;
+                    },
+                    zerar: function zerar () {
+                        this.dados = this.dados.map(function f (item) {
+                            item.preco_1 = '0,00';
+                            item.preco_2 = '0,00';
+                            item.preco_3 = '0,00';
+
+                            return item;
+                        });
+                    },
                     add: function add () {
                         let novo = {};
 
                         novo.rowkey = this.counter;
                         novo.produto = '';
                         novo.quantidade = '0,00';
-                        novo.preco_m = '0,00';
-                        novo.preco_c = '0,00';
+                        novo.preco_1 = '0,00';
+                        novo.preco_2 = '0,00';
+                        novo.preco_3 = '0,00';
                         novo.observacoes = '';
+                        novo.comprado = false;
 
                         this.counter++;
 
@@ -300,6 +355,12 @@
                     },
                     cancel: function cancel (index) {
                         this.dados.splice(index, 1);
+                    },
+                    alternar: function alternar (index) {
+                        this.dados.splice(index, 1, {
+                            ...this.dados[index],
+                            comprado: !this.dados[index].comprado
+                        });
                     },
                     formatRealField: function formatRealField (index, field, event) {
                         var val = '';
@@ -309,9 +370,11 @@
                         if (field == 0) {
                             this.dados[index].quantidade = val;
                         } else if (field == 1) {
-                            this.dados[index].preco_m = val;
+                            this.dados[index].preco_1 = val;
                         } else if (field == 2) {
-                            this.dados[index].preco_c = val;
+                            this.dados[index].preco_2 = val;
+                        } else if (field == 3) {
+                            this.dados[index].preco_3 = val;
                         }
                         
                         event.target.value = val;
@@ -342,24 +405,16 @@
                     },
                     calcularTotalGeral: function calcularTotalGeral (dado) {
                         var q = parseFloat(new String(dado.quantidade).replace('.', '').replace(',', '.'));
-                        var p1 = parseFloat(new String(dado.preco_m).replace('.', '').replace(',', '.'));
-                        var p2 = parseFloat(new String(dado.preco_c).replace('.', '').replace(',', '.'));
 
-                        var pf = 0;
+                        var p1 = parseFloat(new String(dado.preco_1).replace('.', '').replace(',', '.'));
+                        var p2 = parseFloat(new String(dado.preco_2).replace('.', '').replace(',', '.'));
+                        var p3 = parseFloat(new String(dado.preco_3).replace('.', '').replace(',', '.'));
 
-                        if (p1 == 0) {
-                            pf = p2
-                        } else if (p2 == 0) {
-                            pf = p1;
-                        } else {
-                            if (p1 > p2) {
-                                pf = p2;
-                            } else {
-                                pf = p1;
-                            }
-                        }
+                        var pf = Math.min(...[p1, p2, p3].filter(function f (item) {
+                            return item > 0;
+                        }));
 
-                        var total = q * pf;
+                        var total = q * (pf === Infinity ? 0 : pf);
 
                         return this.doubleToReal(total);
                     },
@@ -374,50 +429,25 @@
                     
                         return numberFormatter.format(new String(number));
                     },
-                    calcularTotalMercantil: function calcularTotalMercantil () {
+                    calcularTotalLocal: function calcularTotalLocal (local) {
                         var total = this.dados.reduce(function f (acc, dado) {
                             var q = parseFloat(new String(dado.quantidade).replace('.', '').replace(',', '.'));
-                            var v1 = parseFloat(new String(dado.preco_m).replace('.', '').replace(',', '.'));
-                            var v2 = parseFloat(new String(dado.preco_c).replace('.', '').replace(',', '.'));
-                            var vf = 0;
 
-                            if (v1 == 0) {
-                                vf = 0;
-                            } else if (v2 == 0) {
-                                vf = v1;
-                            } else {
-                                if (v1 > v2) {
-                                    vf = 0;
-                                } else {
-                                    vf = v1;
-                                }
+                            var v1 = parseFloat(new String(dado.preco_1).replace('.', '').replace(',', '.'));
+                            var v2 = parseFloat(new String(dado.preco_2).replace('.', '').replace(',', '.'));
+                            var v3 = parseFloat(new String(dado.preco_3).replace('.', '').replace(',', '.'));
+                            
+                            var vf = Math.min(...[v1, v2, v3].filter(function f (item) {
+                                return item > 0;
+                            }));
+
+                            switch (local) {
+                                case 1: vf = vf == v1 ? v1 : 0; break;
+                                case 2: vf = vf == v2 ? v2 : 0; break;
+                                case 3: vf = vf == v3 ? v3 : 0; break;
                             }
 
-                            return acc + (q * vf);
-                        }, 0);
-
-                        return this.doubleToReal(total);
-                    },
-                    calcularTotalCacarejo: function calcularTotalCacarejo () {
-                        var total = this.dados.reduce(function f (acc, dado) {
-                            var q = parseFloat(new String(dado.quantidade).replace('.', '').replace(',', '.'));
-                            var v1 = parseFloat(new String(dado.preco_m).replace('.', '').replace(',', '.'));
-                            var v2 = parseFloat(new String(dado.preco_c).replace('.', '').replace(',', '.'));
-                            var vf = 0;
-
-                            if (v2 == 0) {
-                                vf = 0;
-                            } else if (v1 == 0) {
-                                vf = v2;
-                            } else {
-                                if (v2 > v1) {
-                                    vf = 0;
-                                } else {
-                                    vf = v2;
-                                }
-                            }
-
-                            return acc + (q * vf);
+                            return acc + (q * (vf === Infinity ? 0 : vf));
                         }, 0);
 
                         return this.doubleToReal(total);
@@ -425,23 +455,16 @@
                     calcularTotalFinal: function calcularTotalFinal () {
                         var total = this.dados.reduce(function f (acc, dado) {
                             var q = parseFloat(new String(dado.quantidade).replace('.', '').replace(',', '.'));
-                            var v1 = parseFloat(new String(dado.preco_m).replace('.', '').replace(',', '.'));
-                            var v2 = parseFloat(new String(dado.preco_c).replace('.', '').replace(',', '.'));
-                            var vf = 0;
 
-                            if (v1 == 0) {
-                                vf = v2;
-                            } else if (v2 == 0) {
-                                vf = v1;
-                            } else {
-                                if (v1 > v2) {
-                                    vf = v2;
-                                } else {
-                                    vf = v1;
-                                }
-                            }
+                            var v1 = parseFloat(new String(dado.preco_1).replace('.', '').replace(',', '.'));
+                            var v2 = parseFloat(new String(dado.preco_2).replace('.', '').replace(',', '.'));
+                            var v3 = parseFloat(new String(dado.preco_3).replace('.', '').replace(',', '.'));
+                            
+                            var vf = Math.min(...[v1, v2, v3].filter(function f (item) {
+                                return item > 0;
+                            }));
 
-                            return acc + (q * vf);
+                            return acc + (q * (vf === Infinity ? 0 : vf));
                         }, 0);
 
                         return this.doubleToReal(total);
